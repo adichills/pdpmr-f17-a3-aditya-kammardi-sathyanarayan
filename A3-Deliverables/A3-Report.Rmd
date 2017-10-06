@@ -1,0 +1,99 @@
+---
+title: "A3-Map Reduce on AWS"
+author: "Aditya Kammardi Sathyanarayan"
+date: "October 6, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# Cluster Architecture -1
+> ####Namenode : 1
+####Datanode : 2
+####Ec2-Instance type - m4.2x.large
+####Harddisk - SSD
+
+# Cluster Architecture -2
+> ####Namenode : 1
+####Datanode : 4
+####Ec2-Instance type - m4.2x.large
+####Harddisk - SSD
+
+# Implmentation of Neighborhood score
+> Like in the last assignment the neighborhood scoring is done in two map reduce phases , phase 1 involves counting the frequency of each letter in the corpus in one map reduce phase , phase 2 involves computing the neighborhood score using the result of phase 1.
+There is a small change in the reduce ,phase as compared to last time ,instead of computing the mean of the neighborhood scores of a word, the median is computed.
+I have implemented the bruteforce way of sorting the values that come to the reduce phase and picking the middle element in the sorted values.
+
+# Experiment - K = 2 Cluster Architecture 2
+Below we have the data measured by the Job History tracker , this was manually extracted. Also  trials are against only one huge file ,
+
+```{r echo=FALSE}
+result4Nodes <- read.csv("2noderun.csv")
+iterations = c(1,2,3,4,5,6,7,8,9,10)
+exectimesn = c(result4Nodes[,1])
+exectimesl = c(result4Nodes[,2])
+data2node <- data.frame(iterations,exectimesl,exectimesn)
+x <- exectimesl
+y <- exectimesn
+height <- rbind(x, y)
+
+mp <- barplot(height,
+ylim = c(0, 700), names.arg = iterations,ylab="Execution time in seconds",xlab="Iterations",main="Execution times from the Job Tracker for Cluster 1",col=c("blue","red"))
+legend("topright", 
+       legend = c("Letter Count", "Neighborhood Score"), 
+       fill = c("blue", "red"))
+
+```
+ 
+> The above graph is comparing the execution times in seconds on y - axis and the iterations on the x -axis. This data was extracted from the Job History server.It shows the time for Letter Count job and the time for Neighborhood Score job
+
+
+```{r echo=FALSE}
+result4Nodes <- read.csv("4noderun.csv")
+iterations = c(1,2,3,4,5,6,7,8,9,10)
+exectimesn = c(result4Nodes[,1])
+exectimesl = c(result4Nodes[,2])
+data <- data.frame(iterations,exectimesl,exectimesn)
+
+```
+```{r echo=FALSE}
+library('ggplot2')
+
+#barplot(exectimesn,iterations,arg=iterations,col='blue',main="Job history tracker time")
+dat1 <- read.csv("2noderunlog.csv")
+dat2 <- read.csv("4noderunlog.csv")
+
+
+x <- exectimesl
+y <- exectimesn
+# create a two row matrix with x and y
+height <- rbind(x, y)
+
+mp <- barplot(height,
+ylim = c(0, 700), names.arg = iterations,ylab="Execution time in seconds",xlab="Iterations",main="Execution times from the Job Tracker for Cluster 2",col=c("blue","red"))
+legend("topright", 
+       legend = c("Letter Count", "Neighborhood Score"), 
+       fill = c("blue", "red"))
+
+
+
+
+
+```
+
+> This graph is similar to the one above, one interesting thing is that in 4 node cluster the letter count phase is faster by almost 33%. However the Neighborhood Score is more or less the same , which indicates that the additional 2 nodes' processing power is doing very little to improve the performance , this could mean any of these things , there is something other than processing power affecting the Neighborhood scoring algorihim ,or the code is inefficient.
+
+
+```{r echo=FALSE}
+x1 <- c(dat1[,1]/1000)
+y1 <- c(dat2[,1]/1000)
+height2 <- rbind(x1,y1)
+mp2 <- barplot(height2,beside=TRUE,ylim=c(0,700), names.arg = iterations,ylab="Execution time in seconds",xlab="Iterations",main="Cluster 1 vs Cluster 2",col = c("blue","red"))
+legend("topright", 
+       legend = c("Cluster 1", "Cluster 2"), 
+       fill = c("blue", "red"))
+
+```
+
+
