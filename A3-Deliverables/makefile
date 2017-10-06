@@ -12,7 +12,7 @@ jar:
 
 run:
    $(HADOOP_HOME)/bin/hadoop jar MainDriver.jar $(REPETITIONS) $(K) input/big-corpus letterCountoutput output executiontimes.csv
-   Rscript -e "rmarkdown::render('report.Rmd')"
+   Rscript -e "rmarkdown::render('A3-Report.Rmd')"
 
 clean:
    $(HADOOP_HOME)/bin/hdfs dfs -rm -r letterCountoutput;
